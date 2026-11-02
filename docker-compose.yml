@@ -1,0 +1,21 @@
+services:
+  routing-simulator:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: routing_convergence_sim
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/status"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+

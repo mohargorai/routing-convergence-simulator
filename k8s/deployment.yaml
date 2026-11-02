@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: routing-simulator-deployment
+  labels:
+    app: routing-convergence-simulator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: routing-convergence-simulator
+  template:
+    metadata:
+      labels:
+        app: routing-convergence-simulator
+    spec:
+      containers:
+        - name: routing-simulator
+          image: routing-convergence-simulator:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+              name: http-ws
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - NET_ADMIN
+                - SYS_ADMIN
+          volumeMounts:
+            - mountPath: /lib/modules
+              name: kernel-modules
+              readOnly: true
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /api/status
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /api/status
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: kernel-modules
+          hostPath:
+            path: /lib/modules
+
