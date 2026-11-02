@@ -198,6 +198,17 @@ export default function TopologyCanvas({
     return `10.0.0.${(clean.charCodeAt(0) % 250) + 1}`;
   };
 
+  const getSvgCoordinates = (clientX, clientY) => {
+    if (!svgRef.current) return null;
+    const svg = svgRef.current;
+    const pt = svg.createSVGPoint();
+    pt.x = clientX;
+    pt.y = clientY;
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return null;
+    return pt.matrixTransform(ctm.inverse());
+  };
+
   const handleMouseDown = (nodeId, e) => {
     e.stopPropagation();
     if (isAddLinkMode) {
@@ -212,11 +223,29 @@ export default function TopologyCanvas({
     onSelectNode(nodeId);
   };
 
-  const handleMouseMove = (e) => {
+  const handleTouchStart = (nodeId, e) => {
+    if (!e.touches || e.touches.length === 0) return;
+    e.stopPropagation();
+    if (isAddLinkMode) {
+      if (!addLinkSource) {
+        onSelectNode(nodeId);
+      } else if (addLinkSource !== nodeId) {
+        onLinkCreated(addLinkSource, nodeId);
+      }
+      return;
+    }
+    setDraggingNode(nodeId);
+    onSelectNode(nodeId);
+  };
+
+  const updateNodePositionFromCoords = (clientX, clientY) => {
     if (!draggingNode || !svgRef.current) return;
-    const rect = svgRef.current.getBoundingClientRect();
-    const x = Math.max(45, Math.min(rect.width - 45, e.clientX - rect.left));
-    const y = Math.max(45, Math.min(rect.height - 45, e.clientY - rect.top));
+    const coords = getSvgCoordinates(clientX, clientY);
+    if (!coords) return;
+    const maxX = isCompact ? 620 : 670;
+    const maxY = isCompact ? 415 : 435;
+    const x = Math.round(Math.max(45, Math.min(maxX, coords.x)));
+    const y = Math.round(Math.max(45, Math.min(maxY, coords.y)));
 
     const updated = {
       ...nodePositions,
@@ -227,6 +256,15 @@ export default function TopologyCanvas({
     } else {
       setInternalPositions(updated);
     }
+  };
+
+  const handleMouseMove = (e) => {
+    updateNodePositionFromCoords(e.clientX, e.clientY);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!draggingNode || !e.touches || e.touches.length === 0) return;
+    updateNodePositionFromCoords(e.touches[0].clientX, e.touches[0].clientY);
   };
 
   const handleMouseUp = () => {
@@ -259,7 +297,9 @@ export default function TopologyCanvas({
     return false;
   };
 
-  const canvasHeight = isCompact ? 'h-[460px]' : 'h-[520px]';
+  const canvasHeight = isCompact
+    ? 'h-[360px] sm:h-[420px] lg:h-[460px]'
+    : 'h-[380px] sm:h-[460px] lg:h-[520px]';
 
   return (
     <div
@@ -273,6 +313,9 @@ export default function TopologyCanvas({
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleMouseUp}
+      onTouchCancel={handleMouseUp}
     >
       {/* Precision Dark Grid Pattern */}
       <div
@@ -359,8 +402,13 @@ export default function TopologyCanvas({
         </div>
       )}
 
-      {/* SVG Canvas */}
-      <svg ref={svgRef} className="w-full h-full cursor-default">
+      {/* SVG Canvas - Responsive Vector Scaling */}
+      <svg
+        ref={svgRef}
+        viewBox={isCompact ? '0 0 660 460' : '0 0 720 480'}
+        preserveAspectRatio="xMidYMid meet"
+        className="w-full h-full cursor-default touch-none"
+      >
         {/* 1. Links Layer */}
         {topology?.links?.map((link) => {
           const posU = nodePositions[link.u];
@@ -709,6 +757,7 @@ export default function TopologyCanvas({
               transform={`translate(${pos.x}, ${pos.y})`}
               className="cursor-pointer select-none"
               onMouseDown={(e) => handleMouseDown(node.id, e)}
+              onTouchStart={(e) => handleTouchStart(node.id, e)}
             >
               {/* Outer Selection Ring */}
               {isSelected && (

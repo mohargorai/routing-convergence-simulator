@@ -70,34 +70,37 @@ export default function ControlPanel({
         <div className="flex items-center p-1 bg-zinc-900/90 rounded-xl border border-zinc-800">
           <button
             onClick={() => onSetProtocol('LS')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+            className={`px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
               protocol === 'LS'
                 ? 'bg-sky-500 text-zinc-950 font-bold shadow-md shadow-sky-500/20'
                 : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            Link State (OSPF)
+            <span className="hidden sm:inline">Link State (OSPF)</span>
+            <span className="sm:hidden font-mono font-bold">OSPF</span>
           </button>
           <button
             onClick={() => onSetProtocol('DV')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+            className={`px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
               protocol === 'DV'
                 ? 'bg-amber-500 text-zinc-950 font-bold shadow-md shadow-amber-500/20'
                 : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            Distance Vector (RIP)
+            <span className="hidden sm:inline">Distance Vector (RIP)</span>
+            <span className="sm:hidden font-mono font-bold">RIP</span>
           </button>
           <button
             onClick={() => onSetProtocol('DUAL')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
               protocol === 'DUAL'
                 ? 'bg-indigo-500 text-white font-bold shadow-md'
                 : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
             <BarChart3 className="w-3.5 h-3.5" />
-            Dual Comparison
+            <span className="hidden sm:inline">Dual Comparison</span>
+            <span className="sm:hidden">Dual</span>
           </button>
         </div>
 
@@ -114,7 +117,7 @@ export default function ControlPanel({
               onChange={(e) => handleSelectPreset(e.target.value)}
               disabled={isPresetLoading}
               style={{ colorScheme: 'dark' }}
-              className="bg-zinc-900 text-zinc-100 outline-none cursor-pointer font-medium text-xs pr-1 border-0 disabled:opacity-70"
+              className="bg-zinc-900 text-zinc-100 outline-none cursor-pointer font-medium text-xs pr-1 border-0 disabled:opacity-70 max-w-[135px] sm:max-w-none truncate"
             >
               <option value="triangle" className="bg-zinc-900 text-zinc-100">3-Node Triangle (Classic Loop)</option>
               <option value="diamond" className="bg-zinc-900 text-zinc-100">4-Node Diamond (Multi-Path)</option>
@@ -126,25 +129,27 @@ export default function ControlPanel({
 
           <button
             onClick={onOpenCountToInfinity}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
             title="Launch interactive Count-to-Infinity demonstration lab"
           >
             <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-            Count-to-Infinity Lab
+            <span className="hidden sm:inline">Count-to-Infinity Lab</span>
+            <span className="sm:hidden">Count-to-Infinity</span>
           </button>
 
           <button
             onClick={onOpenLabReport}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
             title="Export complete academic report for teacher/submission"
           >
             <FileText className="w-3.5 h-3.5 text-emerald-400" />
-            Export Lab Report
+            <span className="hidden sm:inline">Export Lab Report</span>
+            <span className="sm:hidden">Report</span>
           </button>
 
           <button
             onClick={onOpenBenchmark}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
           >
             <BarChart3 className="w-3.5 h-3.5 text-sky-400" />
             Scorecard

@@ -229,34 +229,34 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black">
       {/* Top Navigation / NOC Header */}
-      <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl px-6 py-3 sticky top-0 z-40 flex items-center justify-between">
+      <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl px-4 sm:px-6 py-2.5 sm:py-3 sticky top-0 z-40 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-cyan-400">
+          <div className="p-2 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-cyan-400 shrink-0">
             <Network className="w-5 h-5 animate-pulse" />
           </div>
           <div>
-            <h1 className="text-base font-extrabold tracking-tight text-white flex items-center gap-2">
+            <h1 className="text-sm sm:text-base font-extrabold tracking-tight text-white flex items-center gap-2">
               Routing Convergence Simulator
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800">
                 v1.0 OSPF & RIP
               </span>
             </h1>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[10px] sm:text-[11px] text-slate-400 hidden xs:block">
               Interactive Link State (Dijkstra) & Distance Vector (Bellman-Ford) Convergence Engine
             </p>
           </div>
         </div>
 
         {/* Engine Status Indicators */}
-        <div className="flex items-center gap-3 text-xs">
+        <div className="flex items-center gap-2 sm:gap-3 text-xs flex-wrap">
           {/* Mininet Engine Mode Badge */}
           <button
             onClick={() => setIsMininetModalOpen(true)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[11px] transition-colors cursor-pointer group"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[10px] sm:text-[11px] transition-colors cursor-pointer group"
             title="Click to view Mininet Kernel Namespace runtime details"
           >
             <Server className="w-3.5 h-3.5 text-cyan-400 group-hover:animate-pulse" />
-            <span className="text-slate-400">Emulator:</span>
+            <span className="text-slate-400 hidden md:inline">Emulator:</span>
             <span className="font-mono font-semibold text-cyan-300">
               {mininetStatus?.native_mininet_available ? 'Mininet OVS (Native)' : 'Virtual Namespaces'}
             </span>
@@ -264,19 +264,19 @@ export default function App() {
           </button>
 
           {/* WebSocket Link Status */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px]">
+          <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-[10px] sm:text-[11px]">
             <span
               className={`w-2 h-2 rounded-full ${
                 wsConnected ? 'bg-emerald-400 shadow-[0_0_8px_#10b981]' : 'bg-rose-500 animate-ping'
               }`}
             />
-            <span className="text-slate-400">{wsConnected ? 'Real-Time Telemetry' : 'Reconnecting...'}</span>
+            <span className="text-slate-400">{wsConnected ? 'Real-Time' : 'Reconnecting...'}</span>
           </div>
         </div>
       </header>
 
       {/* Main Workspace Body */}
-      <main className="flex-1 p-6 max-w-[1600px] w-full mx-auto space-y-5">
+      <main className="flex-1 p-3 sm:p-5 lg:p-6 max-w-[1600px] w-full mx-auto space-y-4 sm:space-y-5">
         {/* Simulation Control Panel */}
         <ControlPanel
           protocol={protocol}
@@ -306,7 +306,7 @@ export default function App() {
         {/* DUAL MODE: Synchronized Side-by-Side Dual Comparison Screen */}
         {protocol === 'DUAL' ? (
           <div className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
               {/* Left Canvas: Link State (OSPF / Dijkstra SPF) */}
               <div className="flex flex-col space-y-2">
                 <div className="flex items-center justify-between px-3.5 py-2 bg-slate-900/90 border border-cyan-800/80 rounded-2xl text-xs backdrop-blur-md shadow-lg">
