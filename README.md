@@ -1,5 +1,16 @@
 # Interactive Link State & Distance Vector Routing Convergence Simulator
 
+> 🎓 **Academic Project:** Developed as part of the Semester 5 Computer Networks Course.
+
+[![Python](https://img.shields.io/badge/Python_3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![React 19](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+[![WebSockets](https://img.shields.io/badge/WebSockets-010101?style=for-the-badge&logo=socketdotio&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API)
+[![Mininet OVS](https://img.shields.io/badge/Mininet_OVS-E95420?style=for-the-badge&logo=linux&logoColor=white)](http://mininet.org)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)](https://kubernetes.io)
+
 A production-ready network systems simulator and real-time visualization platform built to demonstrate and analyze the fundamental convergence mechanics of **Link State (OSPF / Dijkstra)** and **Distance Vector (RIP / Bellman-Ford)** routing protocols.
 
 Equipped with an interactive dark-mode React dashboard, Mininet Linux network namespace integration, WebSocket telemetry streaming, Docker containerization, and Kubernetes manifests.
