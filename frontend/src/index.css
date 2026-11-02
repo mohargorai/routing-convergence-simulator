@@ -2,18 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+/* ==================== Spotify OLED Dark Master Theme ==================== */
+:root, [data-theme="spotify"] {
   color-scheme: dark;
+  --bg-app: #000000;
+  --bg-header: rgba(18, 18, 18, 0.96);
+  --bg-card: #121212;
+  --bg-card-subtle: #181818;
+  --bg-canvas: #0a0a0a;
+  --border-card: #282828;
+  --border-subtle: #1f1f1f;
+  --text-main: #ffffff;
+  --text-muted: #b3b3b3;
+  --text-dim: #727272;
+  --accent-primary: #1ed760;
+  --accent-secondary: #1db954;
 }
 
 body {
   margin: 0;
   padding: 0;
-  background-color: #09090b;
-  color: #f4f4f5;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  font-family: 'Plus Jakarta Sans', Inter, system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.011em;
   overflow-x: hidden;
   user-select: none;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Typography polish */
+h1, h2, h3, h4, button {
+  letter-spacing: -0.02em;
+}
+
+/* Monospace with JetBrains Mono */
+code, pre, .font-mono, [data-mono] {
+  font-family: 'JetBrains Mono', ui-monospace, monospace !important;
+  letter-spacing: -0.02em;
 }
 
 /* Custom scrollbars */
@@ -22,52 +48,113 @@ body {
   height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #09090b;
+  background: var(--bg-app);
 }
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
+  background: var(--border-card);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3f3f46;
+  background: var(--text-dim);
 }
 
-/* Ensure dark select dropdowns & options everywhere across browsers */
+/* Form selects */
 select {
-  background-color: #18181b !important;
-  color: #f4f4f5 !important;
-  color-scheme: dark !important;
+  background-color: var(--bg-card-subtle) !important;
+  color: var(--text-main) !important;
 }
 
 option {
-  background-color: #18181b !important;
-  color: #f4f4f5 !important;
-  color-scheme: dark !important;
+  background-color: var(--bg-card-subtle) !important;
+  color: var(--text-main) !important;
 }
 
 select option {
-  background-color: #18181b !important;
-  color: #f4f4f5 !important;
+  background-color: var(--bg-card-subtle) !important;
+  color: var(--text-main) !important;
   padding: 8px 12px;
 }
 
-select option:checked {
-  background-color: #27272a !important;
-  color: #38bdf8 !important;
+/* ==================== Tick & Convergence Completion Animations ==================== */
+
+/* In-flight discrete tick step flash (crisp digital pulse without layout distortion) */
+@keyframes tickFlash {
+  0% {
+    color: #ffffff;
+    transform: translateY(0);
+  }
+  35% {
+    color: #1ed760;
+    transform: translateY(-1px);
+    text-shadow: 0 0 8px rgba(30, 215, 96, 0.7);
+  }
+  100% {
+    color: #1ed760;
+    transform: translateY(0);
+    text-shadow: none;
+  }
 }
 
-/* Glassmorphism panel helpers */
-.glass-panel {
-  background: rgba(18, 19, 26, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+/* Convergence completion badge glow (calm industrial lock-in bloom) */
+@keyframes completionGlow {
+  0% {
+    border-color: rgba(30, 215, 96, 0.2);
+    box-shadow: 0 0 0 rgba(30, 215, 96, 0);
+  }
+  40% {
+    border-color: #1ed760;
+    box-shadow: 0 0 16px rgba(30, 215, 96, 0.45);
+  }
+  100% {
+    border-color: rgba(30, 215, 96, 0.6);
+    box-shadow: 0 0 8px rgba(30, 215, 96, 0.2);
+  }
 }
 
-.glass-panel-glow {
-  background: rgba(18, 19, 26, 0.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  box-shadow: 0 0 30px rgba(56, 189, 248, 0.08);
+/* Checkmark snap on completion (subtle tactile click) */
+@keyframes checkSnap {
+  0% {
+    transform: scale(0.65);
+    opacity: 0.4;
+  }
+  60% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Canvas router tick synchronization ripple */
+@keyframes tickRipple {
+  0% {
+    transform: scale(1);
+    opacity: 0.85;
+    stroke: #1ed760;
+  }
+  100% {
+    transform: scale(1.65);
+    opacity: 0;
+    stroke: #1ed760;
+  }
+}
+
+.animate-tick-flash {
+  animation: tickFlash 0.3s ease-out 1;
+}
+
+.animate-completion-glow {
+  animation: completionGlow 0.6s cubic-bezier(0.16, 1, 0.3, 1) 1 forwards;
+}
+
+.animate-check-snap {
+  animation: checkSnap 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) 1 forwards;
+}
+
+.animate-tick-ripple {
+  animation: tickRipple 0.45s cubic-bezier(0.1, 0.8, 0.3, 1) 1 forwards;
+  transform-origin: center;
+  transform-box: fill-box;
 }

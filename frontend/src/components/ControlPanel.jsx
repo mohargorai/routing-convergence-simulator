@@ -14,11 +14,11 @@ import {
   AlertTriangle,
   FileText,
   Loader2,
+  Clock,
 } from 'lucide-react';
 
 export default function ControlPanel({
   protocol,
-  mode,
   isRunning,
   speedMs,
   presetName,
@@ -63,11 +63,11 @@ export default function ControlPanel({
       : 'Dual Comparison: Link State and Distance Vector run simultaneously on the exact same topology for side-by-side benchmarking.';
 
   return (
-    <div className="bg-[#12131a] border border-zinc-800/90 rounded-2xl p-4 shadow-xl space-y-3">
+    <div className="bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl p-3 sm:p-4 shadow-xl space-y-3 transition-colors">
       {/* Top Row: Protocol Selector & Presets */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800/80 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-subtle)] pb-3">
         {/* Protocol Switcher */}
-        <div className="flex items-center p-1 bg-zinc-900/90 rounded-xl border border-zinc-800">
+        <div className="flex items-center p-1 bg-[var(--bg-card-subtle)] rounded-xl border border-[var(--border-subtle)]">
           <button
             onClick={() => onSetProtocol('LS')}
             className={`px-2.5 sm:px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
@@ -160,7 +160,7 @@ export default function ControlPanel({
       {/* Middle Row: Playback Controls & Status Pill */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         {/* Playback Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={onToggleRun}
             className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
@@ -202,23 +202,25 @@ export default function ControlPanel({
           {/* Quick Node/Link additions */}
           <button
             onClick={onOpenAddNode}
-            className="flex items-center gap-1 px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl text-xs border border-zinc-800 transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white rounded-xl text-xs font-semibold border border-zinc-750 transition-colors cursor-pointer group shadow-sm"
+            title="Add a new custom router node to the network"
           >
-            <Plus className="w-3.5 h-3.5 text-sky-400" />
-            Router
+            <Plus className="w-3.5 h-3.5 text-sky-400 group-hover:scale-110 transition-transform" />
+            <span>+ Router</span>
           </button>
 
           <button
             onClick={onStartAddLink}
-            className="flex items-center gap-1 px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-xl text-xs border border-zinc-800 transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white rounded-xl text-xs font-semibold border border-zinc-750 transition-colors cursor-pointer group shadow-sm"
+            title="Connect a physical network cable/link between any two routers"
           >
-            <LinkIcon className="w-3.5 h-3.5 text-sky-400" />
-            Link
+            <LinkIcon className="w-3.5 h-3.5 text-cyan-400 group-hover:scale-110 transition-transform" />
+            <span>+ Link</span>
           </button>
         </div>
 
         {/* Speed Slider & Status Badge */}
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4">
           <div className="flex items-center gap-2 text-xs text-zinc-400 bg-zinc-900 border border-zinc-800 rounded-xl px-2.5 py-1">
             <span className="text-[11px]">Speed:</span>
             <input
@@ -236,25 +238,35 @@ export default function ControlPanel({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="font-mono text-xs px-2.5 py-1 bg-zinc-900 rounded-xl text-zinc-300 border border-zinc-800">
-              Tick: <strong className="text-sky-400 tabular-nums">{tick}</strong>
-            </span>
+            <div className="flex items-center gap-1.5 font-mono text-xs px-2.5 py-1 bg-[#121212] rounded-xl text-zinc-300 border border-[#282828] shadow-sm select-none">
+              <Clock
+                key={`clock-icon-${tick}`}
+                className={`w-3.5 h-3.5 ${tick > 0 ? 'text-[#1ed760] transition-transform duration-300' : 'text-zinc-500'}`}
+              />
+              <span className="text-zinc-400">Tick:</span>
+              <strong
+                key={`tick-val-${tick}`}
+                className="text-[#1ed760] tabular-nums font-bold animate-tick-flash inline-block"
+              >
+                {tick}
+              </strong>
+            </div>
             <div
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold border ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold border transition-all ${
                 isConverged
-                  ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300'
-                  : 'bg-amber-950/40 border-amber-500/40 text-amber-300 animate-pulse'
+                  ? 'bg-[#121212] border-emerald-500/70 text-[#1ed760] shadow-[0_0_12px_rgba(30,215,96,0.25)] animate-completion-glow'
+                  : 'bg-[#121212] border-amber-500/40 text-amber-300'
               }`}
             >
               {isConverged ? (
                 <>
-                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-                  CONVERGED
+                  <CheckCircle className="w-3.5 h-3.5 text-[#1ed760] animate-check-snap" />
+                  <span>CONVERGED</span>
                 </>
               ) : (
                 <>
                   <Zap className="w-3.5 h-3.5 text-amber-400" />
-                  CONVERGING ({inFlightCount} in-flight)
+                  <span>CONVERGING ({inFlightCount} in-flight)</span>
                 </>
               )}
             </div>
@@ -289,7 +301,7 @@ export default function ControlPanel({
             <span>Poison Reverse</span>
           </label>
 
-          <div className="flex items-center gap-2 ml-auto">
+          <div className="flex items-center gap-2 sm:ml-auto">
             <span className="text-zinc-400 text-[11px]">Infinity Metric:</span>
             <select
               value={dvOptions.infinity_metric}

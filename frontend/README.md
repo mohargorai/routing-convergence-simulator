@@ -1,16 +1,21 @@
-# React + Vite
+# Routing Convergence Simulator - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+The frontend for the **Interactive Link State & Distance Vector Convergence Simulator**.
 
-Currently, two official plugins are available:
+## Tech Stack
+- **Framework**: React 19 + Vite
+- **Styling**: Tailwind CSS with Spotify OLED Dark master palette
+- **Icons**: Lucide React
+- **Linter**: Oxlint
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Development
+```bash
+# Install dependencies
+npm install
 
-## React Compiler
+# Start local dev server (http://localhost:5173)
+npm run dev
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+# Production build
+npm run build
+```

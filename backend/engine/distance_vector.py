@@ -10,9 +10,9 @@ Implements:
 """
 from __future__ import annotations
 import copy
-from typing import Dict, List, Optional, Set, Tuple, Any
-from pydantic import BaseModel, Field
-from .topology import Topology, Link
+from typing import Dict, List, Optional, Set, Any
+from pydantic import BaseModel
+from .topology import Topology
 from .link_state import ControlPacket
 
 

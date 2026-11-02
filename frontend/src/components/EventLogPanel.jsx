@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Terminal, ShieldAlert, CheckCircle2, Info, AlertTriangle, Filter } from 'lucide-react';
+import { Terminal, ShieldAlert, CheckCircle2, Info, AlertTriangle } from 'lucide-react';
 
 export default function EventLogPanel({ logs }) {
   const [filter, setFilter] = useState('ALL');
@@ -14,7 +14,7 @@ export default function EventLogPanel({ logs }) {
   });
 
   return (
-    <div className="bg-[#0f172a]/95 border border-slate-800 rounded-2xl p-4 shadow-xl backdrop-blur-xl h-full flex flex-col">
+    <div className="bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl p-3 sm:p-4 shadow-xl backdrop-blur-xl h-full flex flex-col transition-colors">
       {/* Header & Filter Controls */}
       <div className="flex items-center justify-between border-b border-slate-800/80 pb-3 mb-3">
         <div className="flex items-center gap-2">
@@ -43,7 +43,7 @@ export default function EventLogPanel({ logs }) {
       </div>
 
       {/* Log Feed */}
-      <div className="flex-1 overflow-y-auto space-y-2 pr-1 font-mono text-[11px] max-h-[230px]">
+      <div className="flex-1 overflow-y-auto space-y-2 pr-1 font-mono text-[11px] min-h-[140px] max-h-[220px]">
         {filteredLogs.map((log, idx) => {
           const isDanger = log.level === 'danger';
           const isWarning = log.level === 'warning';
@@ -59,14 +59,14 @@ export default function EventLogPanel({ logs }) {
                   ? 'bg-amber-950/30 border-amber-600/30 text-amber-200'
                   : isSuccess
                   ? 'bg-emerald-950/30 border-emerald-600/30 text-emerald-200'
-                  : 'bg-slate-900/60 border-slate-800/80 text-slate-300'
+                  : 'bg-zinc-900/60 border-zinc-800 text-slate-300'
               }`}
             >
               {/* Severity Icon */}
               <div className="mt-0.5">
-                {isDanger && <ShieldAlert className="w-3.5 h-3.5 text-rose-400 animate-pulse" />}
+                {isDanger && <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />}
                 {isWarning && <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />}
-                {isSuccess && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
+                {isSuccess && <CheckCircle2 className="w-3.5 h-3.5 text-[#1ed760]" />}
                 {!isDanger && !isWarning && !isSuccess && <Info className="w-3.5 h-3.5 text-slate-400" />}
               </div>
 

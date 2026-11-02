@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertTriangle, ShieldCheck, Play, SkipForward, RotateCcw, X, Info, Zap, ArrowRight } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, SkipForward, X, Info } from 'lucide-react';
 
 export default function CountToInfinityModal({
   onClose,
@@ -8,7 +8,6 @@ export default function CountToInfinityModal({
   onSetDvOptions,
   dvOptions,
   onStep,
-  topology,
   activeTelemetry,
 }) {
   const [stepStage, setStepStage] = useState(0);
@@ -36,8 +35,8 @@ export default function CountToInfinityModal({
   const tick = activeTelemetry?.tick ?? 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-3xl bg-[#0f172a] border border-amber-500/40 rounded-3xl p-6 shadow-2xl space-y-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+      <div className="relative w-full max-w-3xl bg-[#0f172a] border border-amber-500/40 rounded-3xl p-4 sm:p-6 shadow-2xl space-y-4 sm:space-y-5 max-h-[90vh] overflow-y-auto">
         {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-slate-800 pb-3">
           <div className="flex items-center gap-2.5">

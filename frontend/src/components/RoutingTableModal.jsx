@@ -49,10 +49,10 @@ export default function RoutingTableModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-2xl bg-[#12131a] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-2xl bg-[#12131a] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden max-h-[85vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-zinc-900/60">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-zinc-800 bg-zinc-900/60">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-sky-500/10 border border-sky-500/30 rounded-xl text-sky-400">
               <Server className="w-5 h-5" />
@@ -90,7 +90,7 @@ export default function RoutingTableModal({
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex border-b border-zinc-800 bg-zinc-900/30 px-6 pt-2">
+        <div className="flex border-b border-zinc-800 bg-zinc-900/30 px-4 sm:px-6 pt-2 overflow-x-auto whitespace-nowrap">
           <button
             onClick={() => setActiveTab('routes')}
             className={`flex items-center gap-2 pb-2.5 px-3 text-xs font-semibold border-b-2 transition-colors cursor-pointer ${
@@ -127,80 +127,82 @@ export default function RoutingTableModal({
         </div>
 
         {/* Tab Content */}
-        <div className="p-6 max-h-[380px] overflow-y-auto">
+        <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
           {activeTab === 'routes' && (
             <div className="space-y-3">
-              <table className="w-full text-left text-xs font-mono">
-                <thead>
-                  <tr className="border-b border-slate-800 text-slate-400">
-                    <th className="pb-2">Destination</th>
-                    <th className="pb-2">Metric / Cost</th>
-                    <th className="pb-2">Next Hop</th>
-                    <th className="pb-2">Path / Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60 text-slate-200">
-                  {Object.entries(routingTable).map(([dest, entry]) => {
-                    const cost = entry.cost;
-                    const isUnreachable = cost >= 16;
-                    const isLoop = entry.loop_detected;
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-mono">
+                  <thead>
+                    <tr className="border-b border-slate-800 text-slate-400">
+                      <th className="pb-2">Destination</th>
+                      <th className="pb-2">Metric / Cost</th>
+                      <th className="pb-2">Next Hop</th>
+                      <th className="pb-2">Path / Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60 text-slate-200">
+                    {Object.entries(routingTable).map(([dest, entry]) => {
+                      const cost = entry.cost;
+                      const isUnreachable = cost >= 16;
+                      const isLoop = entry.loop_detected;
 
-                    return (
-                      <tr key={dest} className="hover:bg-slate-800/30">
-                        <td className="py-2.5 font-bold flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-cyan-400" />
-                          Router {dest}
-                          {dest === nodeId && <span className="text-[10px] text-slate-500 font-normal">(self)</span>}
-                        </td>
-                        <td className="py-2.5">
-                          <span
-                            className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                              isUnreachable
-                                ? 'bg-rose-950/80 text-rose-400 border border-rose-800'
-                                : 'bg-slate-800 text-cyan-300'
-                            }`}
-                          >
-                            {isUnreachable ? '∞ (16+)' : cost}
-                          </span>
-                        </td>
-                        <td className="py-2.5">
-                          {entry.next_hop ? (
-                            <span className="text-slate-300">
-                              via <span className="font-bold text-cyan-400">{entry.next_hop}</span>
+                      return (
+                        <tr key={dest} className="hover:bg-slate-800/30">
+                          <td className="py-2.5 font-bold flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                            Router {dest}
+                            {dest === nodeId && <span className="text-[10px] text-slate-500 font-normal">(self)</span>}
+                          </td>
+                          <td className="py-2.5">
+                            <span
+                              className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                                isUnreachable
+                                  ? 'bg-rose-950/80 text-rose-400 border border-rose-800'
+                                  : 'bg-slate-800 text-cyan-300'
+                              }`}
+                            >
+                              {isUnreachable ? '∞ (16+)' : cost}
                             </span>
-                          ) : (
-                            <span className="text-rose-400 italic">None (Drop)</span>
-                          )}
-                        </td>
-                        <td className="py-2.5">
-                          {isLoop ? (
-                            <span className="flex items-center gap-1 text-rose-400 font-bold animate-pulse">
-                              <AlertOctagon className="w-3.5 h-3.5" />
-                              LOOP DETECTED
-                            </span>
-                          ) : entry.path ? (
-                            <span className="text-slate-400 text-[11px]">{entry.path.join(' → ')}</span>
-                          ) : isUnreachable ? (
-                            <span className="text-slate-500">Unreachable</span>
-                          ) : (
-                            <span className="flex items-center gap-1 text-emerald-400">
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                              Active Forwarding
-                            </span>
-                          )}
+                          </td>
+                          <td className="py-2.5">
+                            {entry.next_hop ? (
+                              <span className="text-slate-300">
+                                via <span className="font-bold text-cyan-400">{entry.next_hop}</span>
+                              </span>
+                            ) : (
+                              <span className="text-rose-400 italic">None (Drop)</span>
+                            )}
+                          </td>
+                          <td className="py-2.5">
+                            {isLoop ? (
+                              <span className="flex items-center gap-1 text-rose-400 font-bold animate-pulse">
+                                <AlertOctagon className="w-3.5 h-3.5" />
+                                LOOP DETECTED
+                              </span>
+                            ) : entry.path ? (
+                              <span className="text-slate-400 text-[11px]">{entry.path.join(' → ')}</span>
+                            ) : isUnreachable ? (
+                              <span className="text-slate-500">Unreachable</span>
+                            ) : (
+                              <span className="flex items-center gap-1 text-emerald-400">
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                Active Forwarding
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {Object.keys(routingTable).length === 0 && (
+                      <tr>
+                        <td colSpan="4" className="text-center py-6 text-slate-500">
+                          No route entries computed yet. Advance simulation tick to populate.
                         </td>
                       </tr>
-                    );
-                  })}
-                  {Object.keys(routingTable).length === 0 && (
-                    <tr>
-                      <td colSpan="4" className="text-center py-6 text-slate-500">
-                        No route entries computed yet. Advance simulation tick to populate.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
 
@@ -211,7 +213,7 @@ export default function RoutingTableModal({
                   <p className="text-xs text-slate-400 mb-2">
                     Synchronized Link State Database (LSDB) populated via reliable LSA flooding:
                   </p>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {Object.entries(lsdb).map(([adv, lsa]) => (
                       <div
                         key={adv}
@@ -243,7 +245,7 @@ export default function RoutingTableModal({
                   <p className="text-xs text-slate-400 mb-2">
                     Direct distance vectors advertised by adjacent neighbors:
                   </p>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {Object.entries(neighborVectors).map(([nbr, vec]) => (
                       <div
                         key={nbr}
@@ -288,7 +290,7 @@ export default function RoutingTableModal({
                 <p className="text-xs text-zinc-400">
                   Execute a real ICMP ping between Mininet router network namespaces:
                 </p>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                   <div className="text-xs font-mono text-sky-400">From: r_{nodeId}</div>
                   <span className="text-zinc-500">→</span>
                   <select

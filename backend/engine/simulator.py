@@ -3,7 +3,6 @@ Simulation Coordinator orchestrating Link State, Distance Vector, and Dual-Proto
 comparison modes, topology mutations, Mininet synchronization, and live telemetry.
 """
 from __future__ import annotations
-import copy
 import logging
 import time
 from typing import Dict, List, Optional, Any

@@ -3,16 +3,20 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
+    "./frontend/index.html",
+    "./frontend/src/**/*.{js,ts,jsx,tsx}",
   ],
   darkMode: 'class',
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+      },
       colors: {
-        background: '#090d16',
-        card: '#111827',
-        border: '#1f293d',
-        accent: '#06b6d4',
-        accentHover: '#0891b2',
+        background: 'var(--bg-app)',
+        card: 'var(--bg-card)',
+        border: 'var(--border-card)',
       },
       animation: {
         'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',

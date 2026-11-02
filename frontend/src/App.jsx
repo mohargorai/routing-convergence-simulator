@@ -1,21 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Activity,
-  Layers,
-  Radio,
   Server,
-  Zap,
-  BarChart3,
   Network,
-  RotateCcw,
-  Sliders,
   CheckCircle2,
-  AlertCircle,
   HelpCircle,
-  FileText,
-  AlertTriangle,
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 
 import TopologyCanvas from './components/TopologyCanvas';
 import ControlPanel from './components/ControlPanel';
@@ -49,6 +39,7 @@ export default function App() {
   const [isCountToInfinityOpen, setIsCountToInfinityOpen] = useState(false);
   const [isLabReportOpen, setIsLabReportOpen] = useState(false);
   const [tracedPaths, setTracedPaths] = useState({ active: null, ls: null, dv: null });
+  const [convergedToast, setConvergedToast] = useState(null);
 
   const handleSetTracedPath = (data) => {
     if (Array.isArray(data)) {
@@ -66,6 +57,13 @@ export default function App() {
   const [sharedNodePositions, setSharedNodePositions] = useState(null);
   const [wsConnected, setWsConnected] = useState(false);
   const [pduTrigger, setPduTrigger] = useState(0);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', 'spotify');
+    try {
+      localStorage.setItem('simulator_theme', 'spotify');
+    } catch {}
+  }, []);
 
   const [dvOptions, setDvOptions] = useState({
     split_horizon: true,
@@ -100,15 +98,14 @@ export default function App() {
             });
           }
 
-          // Trigger subtle celebration when network reaches convergence
+          // Trigger clean convergence toast when network reaches stable state
           const isNowConverged = data.active_telemetry?.is_converged;
           if (isNowConverged && !prevConvergedRef.current && data.active_telemetry?.tick > 0) {
-            confetti({
-              particleCount: 25,
-              spread: 60,
-              origin: { y: 0.8 },
-              colors: ['#06b6d4', '#10b981', '#f59e0b'],
+            setConvergedToast({
+              tick: data.active_telemetry.tick,
+              protocol: data.protocol,
             });
+            setTimeout(() => setConvergedToast(null), 3200);
           }
           prevConvergedRef.current = isNowConverged;
         } catch (err) {
@@ -227,21 +224,21 @@ export default function App() {
         (state?.dv_telemetry?.total_control_packets ?? 0);
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-black">
+    <div className="min-h-screen bg-[var(--bg-app)] text-[var(--text-main)] flex flex-col font-sans transition-colors duration-200">
       {/* Top Navigation / NOC Header */}
-      <header className="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl px-4 sm:px-6 py-2.5 sm:py-3 sticky top-0 z-40 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+      <header className="border-b border-[var(--border-card)] bg-[var(--bg-header)] backdrop-blur-xl px-4 sm:px-6 py-2.5 sm:py-3 sticky top-0 z-40 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-cyan-500/10 border border-cyan-500/30 rounded-xl text-cyan-400 shrink-0">
-            <Network className="w-5 h-5 animate-pulse" />
+          <div className="p-2 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-[#1ed760] shrink-0">
+            <Network className="w-5 h-5 text-[#1ed760]" />
           </div>
           <div>
             <h1 className="text-sm sm:text-base font-extrabold tracking-tight text-white flex items-center gap-2">
               Routing Convergence Simulator
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-900 text-[#1ed760] border border-zinc-750">
                 v1.0 OSPF & RIP
               </span>
             </h1>
-            <p className="text-[10px] sm:text-[11px] text-slate-400 hidden xs:block">
+            <p className="text-[10px] sm:text-[11px] text-zinc-400 hidden sm:block">
               Interactive Link State (Dijkstra) & Distance Vector (Bellman-Ford) Convergence Engine
             </p>
           </div>
@@ -252,35 +249,46 @@ export default function App() {
           {/* Mininet Engine Mode Badge */}
           <button
             onClick={() => setIsMininetModalOpen(true)}
-            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[10px] sm:text-[11px] transition-colors cursor-pointer group"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[var(--bg-card-subtle)] hover:brightness-110 border border-[var(--border-card)] text-[10px] sm:text-[11px] transition-all cursor-pointer group shadow-sm"
             title="Click to view Mininet Kernel Namespace runtime details"
           >
-            <Server className="w-3.5 h-3.5 text-cyan-400 group-hover:animate-pulse" />
-            <span className="text-slate-400 hidden md:inline">Emulator:</span>
-            <span className="font-mono font-semibold text-cyan-300">
-              {mininetStatus?.native_mininet_available ? 'Mininet OVS (Native)' : 'Virtual Namespaces'}
+            <Server className="w-3.5 h-3.5 text-zinc-400 group-hover:text-[#1ed760]" />
+            <span className="text-zinc-400 hidden md:inline">Emulator:</span>
+            <span className="font-mono font-semibold text-zinc-200">
+              {mininetStatus?.native_mininet_available ? 'Mininet OVS' : 'Virtual Namespaces'}
             </span>
-            <HelpCircle className="w-3 h-3 text-slate-500 group-hover:text-cyan-400 ml-0.5" />
+            <HelpCircle className="w-3 h-3 text-zinc-500 group-hover:text-[#1ed760] ml-0.5" />
           </button>
 
           {/* WebSocket Link Status */}
-          <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-[10px] sm:text-[11px]">
+          <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[var(--bg-card-subtle)] border border-[var(--border-card)] text-[10px] sm:text-[11px] shadow-sm">
             <span
               className={`w-2 h-2 rounded-full ${
-                wsConnected ? 'bg-emerald-400 shadow-[0_0_8px_#10b981]' : 'bg-rose-500 animate-ping'
+                wsConnected ? 'bg-[#1ed760] shadow-[0_0_8px_#1ed760]' : 'bg-rose-500'
               }`}
             />
-            <span className="text-slate-400">{wsConnected ? 'Real-Time' : 'Reconnecting...'}</span>
+            <span className="text-zinc-400">{wsConnected ? 'Real-Time' : 'Reconnecting...'}</span>
           </div>
         </div>
       </header>
+
+      {/* Network Convergence Completion HUD Pill */}
+      {convergedToast && (
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-4 py-2 bg-[#121212] border border-emerald-500/70 rounded-full shadow-[0_0_24px_rgba(30,215,96,0.35)] text-xs font-mono select-none animate-fade-in pointer-events-none">
+          <CheckCircle2 className="w-4 h-4 text-[#1ed760] animate-check-snap" />
+          <span className="font-sans font-bold text-white">Network Converged</span>
+          <span className="text-zinc-600">•</span>
+          <span className="text-[#1ed760] font-bold">t={convergedToast.tick}</span>
+          <span className="text-zinc-600">•</span>
+          <span className="text-zinc-400">Routes Synchronized</span>
+        </div>
+      )}
 
       {/* Main Workspace Body */}
       <main className="flex-1 p-3 sm:p-5 lg:p-6 max-w-[1600px] w-full mx-auto space-y-4 sm:space-y-5">
         {/* Simulation Control Panel */}
         <ControlPanel
           protocol={protocol}
-          mode={state?.mode || 'step'}
           isRunning={state?.is_running || false}
           speedMs={state?.speed_ms || 500}
           presetName={state?.preset_name || 'triangle'}
@@ -309,20 +317,20 @@ export default function App() {
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
               {/* Left Canvas: Link State (OSPF / Dijkstra SPF) */}
               <div className="flex flex-col space-y-2">
-                <div className="flex items-center justify-between px-3.5 py-2 bg-slate-900/90 border border-cyan-800/80 rounded-2xl text-xs backdrop-blur-md shadow-lg">
+                <div className="flex items-center justify-between px-3.5 py-2 bg-[#121212] border border-[#282828] rounded-2xl text-xs backdrop-blur-md shadow-lg">
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]" />
-                    <span className="font-bold text-cyan-300">
+                    <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.5)]" />
+                    <span className="font-bold text-white">
                       Link State (OSPF / Dijkstra SPF)
                     </span>
                   </div>
                   <div className="flex items-center gap-3 font-mono text-[11px]">
-                    <span className="text-slate-400">
+                    <span className="text-zinc-400">
                       Packets: <strong className="text-cyan-300">{state?.ls_telemetry?.total_control_packets ?? 0}</strong>
                     </span>
-                    <span className="text-slate-600">•</span>
-                    <span className="text-slate-400">
-                      Avg Hops: <strong className="text-slate-200">{state?.ls_telemetry?.avg_hop_count ?? '1.0'}</strong>
+                    <span className="text-zinc-600">•</span>
+                    <span className="text-zinc-400">
+                      Avg Hops: <strong className="text-zinc-200">{state?.ls_telemetry?.avg_hop_count ?? '1.0'}</strong>
                     </span>
                   </div>
                 </div>
@@ -353,20 +361,20 @@ export default function App() {
 
               {/* Right Canvas: Distance Vector (RIP / Bellman-Ford) */}
               <div className="flex flex-col space-y-2">
-                <div className="flex items-center justify-between px-3.5 py-2 bg-slate-900/90 border border-amber-800/80 rounded-2xl text-xs backdrop-blur-md shadow-lg">
+                <div className="flex items-center justify-between px-3.5 py-2 bg-[#121212] border border-[#282828] rounded-2xl text-xs backdrop-blur-md shadow-lg">
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_#fbbf24]" />
-                    <span className="font-bold text-amber-300">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
+                    <span className="font-bold text-white">
                       Distance Vector (RIP / Bellman-Ford)
                     </span>
                   </div>
                   <div className="flex items-center gap-3 font-mono text-[11px]">
-                    <span className="text-slate-400">
+                    <span className="text-zinc-400">
                       Advertisements: <strong className="text-amber-300">{state?.dv_telemetry?.total_control_packets ?? 0}</strong>
                     </span>
-                    <span className="text-slate-600">•</span>
-                    <span className="text-slate-400">
-                      Loops: <strong className={(state?.dv_telemetry?.total_loops_detected ?? 0) > 0 ? 'text-rose-400 animate-pulse' : 'text-emerald-400'}>
+                    <span className="text-zinc-600">•</span>
+                    <span className="text-zinc-400">
+                      Loops: <strong className={(state?.dv_telemetry?.total_loops_detected ?? 0) > 0 ? 'text-rose-400 font-bold' : 'text-[#1ed760]'}>
                         {state?.dv_telemetry?.total_loops_detected ?? 0}
                       </strong>
                     </span>
@@ -399,8 +407,8 @@ export default function App() {
             </div>
 
             {/* Bottom Strip: Hop-by-Hop Packet Tracer & Unified Event Log */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-              <div className="lg:col-span-7">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+              <div className="lg:col-span-7 flex flex-col h-full">
                 <PacketTracerBar
                   nodes={topology?.nodes || []}
                   topology={topology}
@@ -411,11 +419,9 @@ export default function App() {
                   onExecutePing={handlePing}
                   onSendPacket={() => setPduTrigger((c) => c + 1)}
                   onStep={handleStep}
-                  onToggleRun={handleToggleRun}
-                  isRunning={state?.is_running}
                 />
               </div>
-              <div className="lg:col-span-5">
+              <div className="lg:col-span-5 flex flex-col h-full">
                 <EventLogPanel logs={activeTelemetry?.recent_logs} />
               </div>
             </div>
@@ -426,7 +432,7 @@ export default function App() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
               {/* Interactive Topology Graph Canvas */}
               <div className="lg:col-span-8 flex flex-col space-y-2.5">
-                <div className="flex items-center justify-between px-3.5 py-2 bg-slate-900/60 border border-slate-800/80 rounded-xl text-xs">
+                <div className="flex items-center justify-between px-3.5 py-2 bg-[#121212] border border-[#282828] rounded-xl text-xs">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-cyan-400" />
                     <span className="font-semibold text-slate-200">
@@ -468,23 +474,23 @@ export default function App() {
               {/* Right Column: Telemetry Scorecard & Event Stream */}
               <div className="lg:col-span-4 flex flex-col space-y-3.5">
                 {/* Quick Metrics Card */}
-                <div className="bg-[#0f172a]/95 border border-slate-800 rounded-2xl p-4 shadow-xl backdrop-blur-xl">
+                <div className="bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl p-4 shadow-xl backdrop-blur-xl transition-colors">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono mb-3 flex items-center justify-between">
                     <span>Convergence Telemetry</span>
                     <Activity className="w-4 h-4 text-cyan-400" />
                   </h3>
 
                   <div className="grid grid-cols-2 gap-2.5 text-xs font-mono">
-                    <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800/80">
-                      <div className="text-slate-400 text-[10px] uppercase font-sans">Control Packets</div>
+                    <div className="p-3 bg-gradient-to-br from-cyan-950/30 to-slate-900/80 rounded-xl border border-cyan-800/40 shadow-sm">
+                      <div className="text-slate-400 text-[10px] uppercase font-sans font-medium">Control Packets</div>
                       <div className="text-xl font-extrabold text-cyan-300 mt-0.5 tabular-nums">{totalPackets}</div>
                       <div className="text-[10px] text-slate-500 font-sans">
                         {protocol === 'LS' ? 'LSA Floods' : 'Vector Advertisements'}
                       </div>
                     </div>
 
-                    <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800/80">
-                      <div className="text-slate-400 text-[10px] uppercase font-sans">Convergence Tick</div>
+                    <div className="p-3 bg-gradient-to-br from-emerald-950/30 to-slate-900/80 rounded-xl border border-emerald-800/40 shadow-sm">
+                      <div className="text-slate-400 text-[10px] uppercase font-sans font-medium">Convergence Tick</div>
                       <div className="text-xl font-extrabold text-emerald-300 mt-0.5 tabular-nums">
                         {activeTelemetry?.convergence_tick ?? (activeTelemetry?.is_converged ? activeTelemetry?.tick : '--')}
                       </div>
@@ -493,9 +499,9 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800/80">
-                      <div className="text-slate-400 text-[10px] uppercase font-sans">Avg Path Hops</div>
-                      <div className="text-xl font-extrabold text-slate-200 mt-0.5 tabular-nums">
+                    <div className="p-3 bg-gradient-to-br from-sky-950/30 to-slate-900/80 rounded-xl border border-sky-800/40 shadow-sm">
+                      <div className="text-slate-400 text-[10px] uppercase font-sans font-medium">Avg Path Hops</div>
+                      <div className="text-xl font-extrabold text-slate-100 mt-0.5 tabular-nums">
                         {state?.ls_telemetry?.avg_hop_count && state.ls_telemetry.avg_hop_count > 0
                           ? `${state.ls_telemetry.avg_hop_count}`
                           : '1.0'}
@@ -503,11 +509,15 @@ export default function App() {
                       <div className="text-[10px] text-slate-500 font-sans">Shortest path tree</div>
                     </div>
 
-                    <div className="p-3 bg-slate-900/80 rounded-xl border border-slate-800/80">
-                      <div className="text-slate-400 text-[10px] uppercase font-sans">Loops Detected</div>
+                    <div className={`p-3 rounded-xl border shadow-sm ${
+                      (state?.dv_telemetry?.total_loops_detected ?? 0) > 0
+                        ? 'bg-gradient-to-br from-rose-950/50 to-slate-900/90 border-rose-500/60 shadow-[0_0_12px_rgba(244,63,94,0.25)]'
+                        : 'bg-gradient-to-br from-slate-950/40 to-slate-900/80 border-slate-800/80'
+                    }`}>
+                      <div className="text-slate-400 text-[10px] uppercase font-sans font-medium">Loops Detected</div>
                       <div
                         className={`text-xl font-extrabold mt-0.5 tabular-nums ${
-                          (state?.dv_telemetry?.total_loops_detected ?? 0) > 0 ? 'text-rose-400 animate-pulse' : 'text-emerald-400'
+                          (state?.dv_telemetry?.total_loops_detected ?? 0) > 0 ? 'text-rose-400 font-bold' : 'text-[#1ed760]'
                         }`}
                       >
                         {state?.dv_telemetry?.total_loops_detected ?? 0}
@@ -535,8 +545,6 @@ export default function App() {
               onExecutePing={handlePing}
               onSendPacket={() => setPduTrigger((c) => c + 1)}
               onStep={handleStep}
-              onToggleRun={handleToggleRun}
-              isRunning={state?.is_running}
             />
           </div>
         )}
@@ -573,7 +581,6 @@ export default function App() {
           onSetDvOptions={handleSetDvOptions}
           dvOptions={dvOptions}
           onStep={handleStep}
-          topology={topology}
           activeTelemetry={state?.dv_telemetry}
         />
       )}
@@ -586,7 +593,6 @@ export default function App() {
           lsTelemetry={state?.ls_telemetry}
           dvTelemetry={state?.dv_telemetry}
           mininetStatus={mininetStatus}
-          protocol={protocol}
         />
       )}
 
@@ -602,7 +608,7 @@ export default function App() {
       {/* Mininet Runtime Details Modal */}
       {isMininetModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in">
-          <div className="relative w-full max-w-2xl bg-[#0f172a] border border-cyan-500/40 rounded-3xl p-6 shadow-2xl">
+          <div className="relative w-full max-w-2xl bg-[#0f172a] border border-cyan-500/40 rounded-3xl p-4 sm:p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
               <div className="flex items-center gap-2 text-cyan-400 font-bold text-base">
                 <Server className="w-5 h-5" />

@@ -9,7 +9,7 @@ Implements:
 """
 from __future__ import annotations
 import heapq
-from typing import Dict, List, Optional, Set, Tuple, Any
+from typing import Dict, List, Optional, Set, Any
 from pydantic import BaseModel
 from .topology import Topology, Link
 

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Activity, Zap, Eye, EyeOff, CheckCircle2, AlertCircle, Mail, XCircle, Play } from 'lucide-react';
+import { Activity, Zap, Eye, EyeOff, CheckCircle2, Mail, XCircle } from 'lucide-react';
 
 export default function TopologyCanvas({
   topology,
@@ -33,8 +33,7 @@ export default function TopologyCanvas({
   useEffect(() => {
     if (!topology || !topology.nodes) return;
     const initial = {};
-    const count = topology.nodes.length;
-    topology.nodes.forEach((node, i) => {
+    topology.nodes.forEach((node) => {
       // If compact (dual view), scale x slightly inwards
       const scaleX = isCompact ? 0.8 : 1.0;
       const offsetX = isCompact ? 35 : 0;
@@ -49,9 +48,10 @@ export default function TopologyCanvas({
 
   const nodePositions = sharedPositions || internalPositions;
 
-  // Cisco Packet Tracer Style Simulation: Single Round-Trip Transmission (No Infinite Loop!)
+  // Cisco Packet Tracer Style Simulation: Explicit Triggered Round-Trip (Only on user click!)
   useEffect(() => {
-    if (!tracedPath || tracedPath.length < 2) {
+    // Only run if user explicitly triggered via Send PDU / Send Packet
+    if (!tracedPath || tracedPath.length < 2 || (pduTrigger === 0 && localTrigger === 0)) {
       setPduState(null);
       return;
     }
@@ -63,6 +63,7 @@ export default function TopologyCanvas({
     }
 
     let animFrameId = null;
+    let dismissTimer = null;
     let startTime = null;
 
     // Check link status along the forward path
@@ -130,6 +131,7 @@ export default function TopologyCanvas({
             isReply: false,
             statusText: `Packet Dropped at Router ${dropNodeId} (Link to ${tracedPath[dropAtIndex + 1]} is Down)`,
           });
+          dismissTimer = setTimeout(() => setPduState(null), 3000);
         } else {
           const srcPos = nodePositions[tracedPath[0]];
           setPduState({
@@ -140,6 +142,7 @@ export default function TopologyCanvas({
             isReply: true,
             statusText: `Successful (ICMP Echo Reply received at Router ${tracedPath[0]})`,
           });
+          dismissTimer = setTimeout(() => setPduState(null), 3000);
         }
         return; // STOPS HERE! ZERO LOOPING!
       }
@@ -178,6 +181,7 @@ export default function TopologyCanvas({
 
     return () => {
       if (animFrameId) cancelAnimationFrame(animFrameId);
+      if (dismissTimer) clearTimeout(dismissTimer);
     };
   }, [
     tracedPath,
@@ -303,13 +307,7 @@ export default function TopologyCanvas({
 
   return (
     <div
-      className={`relative w-full ${canvasHeight} bg-[#0c0d12] rounded-2xl overflow-hidden border ${
-        protocolType === 'LS'
-          ? 'border-cyan-900/60 shadow-[0_0_20px_rgba(6,182,212,0.06)]'
-          : protocolType === 'DV'
-          ? 'border-amber-900/60 shadow-[0_0_20px_rgba(245,158,11,0.06)]'
-          : 'border-zinc-800 shadow-2xl'
-      } select-none flex flex-col`}
+      className={`relative w-full ${canvasHeight} bg-[var(--bg-canvas)] rounded-2xl overflow-hidden border border-[var(--border-card)] shadow-2xl select-none flex flex-col transition-colors`}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
@@ -333,10 +331,10 @@ export default function TopologyCanvas({
         <div className="flex items-center gap-2 pointer-events-auto">
           {title && (
             <span
-              className={`px-3 py-1 rounded-xl text-xs font-bold border backdrop-blur-md shadow-md ${
+              className={`px-3 py-1 rounded-xl text-xs font-bold border shadow-md ${
                 protocolType === 'LS'
-                  ? 'bg-cyan-950/80 text-cyan-300 border-cyan-800'
-                  : 'bg-amber-950/80 text-amber-300 border-amber-800'
+                  ? 'bg-[#121212] text-cyan-300 border-[#282828]'
+                  : 'bg-[#121212] text-amber-300 border-[#282828]'
               }`}
             >
               {title}
@@ -344,21 +342,27 @@ export default function TopologyCanvas({
           )}
 
           <div
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-semibold font-mono border backdrop-blur-md ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-semibold font-mono border shadow-md transition-all ${
               isConverged
-                ? 'bg-emerald-950/80 text-emerald-400 border-emerald-800/80'
-                : 'bg-zinc-900/90 text-amber-400 border-zinc-700'
+                ? 'bg-[#121212] text-[#1ed760] border-emerald-500/70 shadow-[0_0_12px_rgba(30,215,96,0.25)] animate-completion-glow'
+                : 'bg-[#121212] text-amber-400 border-[#282828]'
             }`}
           >
             {isConverged ? (
               <>
-                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                <span>Converged (t={tick})</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#1ed760] animate-check-snap" />
+                <span className="inline-block text-[#1ed760] font-semibold">
+                  Converged (t={tick})
+                </span>
               </>
             ) : (
               <>
-                <Activity className="w-3 h-3 text-amber-400 animate-pulse" />
+                <Activity className="w-3.5 h-3.5 text-amber-400" />
                 <span>In-Flight ({inFlightPackets.length})</span>
+                <span className="text-zinc-600">•</span>
+                <span key={`inflight-t-${tick}`} className="text-zinc-300 font-bold inline-block animate-tick-flash">
+                  t={tick}
+                </span>
               </>
             )}
           </div>
@@ -369,17 +373,17 @@ export default function TopologyCanvas({
           {tracedPath && tracedPath.length >= 2 && (
             <button
               onClick={() => setLocalTrigger((prev) => prev + 1)}
-              className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 rounded-lg text-[11px] text-emerald-300 font-semibold transition-colors shadow-md cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1 bg-[#121212] hover:bg-emerald-950/60 border border-emerald-800/60 rounded-lg text-[11px] text-[#1ed760] font-semibold transition-colors shadow-md cursor-pointer"
               title="Send a Cisco Packet Tracer ICMP PDU envelope along the route"
             >
-              <Mail className="w-3.5 h-3.5 text-emerald-400" />
+              <Mail className="w-3.5 h-3.5 text-[#1ed760]" />
               <span>Send PDU</span>
             </button>
           )}
 
           <button
             onClick={() => setShowPackets(!showPackets)}
-            className="flex items-center gap-1.5 px-2.5 py-1 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/80 rounded-lg text-[11px] text-zinc-300 transition-colors shadow-md cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 py-1 bg-[#121212] hover:bg-[#1a1a1a] border border-[#282828] rounded-lg text-[11px] text-zinc-300 transition-colors shadow-md cursor-pointer"
             title="Toggle visibility of in-flight control packet pulses"
           >
             {showPackets ? <Eye className="w-3 h-3 text-cyan-400" /> : <EyeOff className="w-3 h-3 text-zinc-500" />}
@@ -390,7 +394,7 @@ export default function TopologyCanvas({
 
       {/* Mode Banner for Add Link */}
       {isAddLinkMode && (
-        <div className="absolute top-12 left-1/2 -translate-x-1/2 z-20 px-4 py-1.5 bg-amber-500/20 border border-amber-500/40 rounded-full text-amber-300 text-xs font-semibold backdrop-blur-md flex items-center gap-2 shadow-lg animate-pulse">
+        <div className="absolute top-12 left-1/2 -translate-x-1/2 z-20 px-4 py-1.5 bg-amber-500/20 border border-amber-500/40 rounded-full text-amber-300 text-xs font-semibold backdrop-blur-md flex items-center gap-2 shadow-lg">
           <Zap className="w-3.5 h-3.5 text-amber-400" />
           <span>Click second router to connect link</span>
           <button
@@ -444,10 +448,10 @@ export default function TopologyCanvas({
                   y1={posU.y}
                   x2={posV.x}
                   y2={posV.y}
-                  stroke="#10b981"
+                  stroke="#1ed760"
                   strokeWidth="6"
                   strokeDasharray="8 4"
-                  className="animate-pulse"
+                  opacity="0.75"
                 />
               )}
 
@@ -552,7 +556,7 @@ export default function TopologyCanvas({
             const py = posSrc.y + dy * 0.35 + ny * offset;
 
             return (
-              <g key={pkt.packet_id} className="pointer-events-none animate-pulse">
+              <g key={pkt.packet_id} className="pointer-events-none">
                 <circle
                   cx={px}
                   cy={py}
@@ -602,8 +606,8 @@ export default function TopologyCanvas({
                 width="34"
                 height="24"
                 rx="4"
-                fill={pduState.isReply ? 'rgba(16,185,129,0.3)' : 'rgba(2,132,199,0.3)'}
-                className="animate-ping"
+                fill={pduState.isReply ? 'rgba(30,215,96,0.3)' : 'rgba(2,132,199,0.3)'}
+                opacity="0.6"
               />
 
               {/* Main Envelope Body */}
@@ -685,7 +689,7 @@ export default function TopologyCanvas({
 
         {/* Cisco Packet Tracer: Successful Arrival Badge at Source Router */}
         {pduState && pduState.phase === 'completed' && pduState.pos && (
-          <g transform={`translate(${pduState.pos.x}, ${pduState.pos.y - 36})`} className="pointer-events-none animate-bounce">
+          <g transform={`translate(${pduState.pos.x}, ${pduState.pos.y - 36})`} className="pointer-events-none">
             <rect
               x="-46"
               y="-10"
@@ -695,7 +699,7 @@ export default function TopologyCanvas({
               fill="#064e3b"
               stroke="#10b981"
               strokeWidth="1.5"
-              className="filter drop-shadow-[0_0_10px_rgba(16,185,129,0.9)]"
+              className="filter drop-shadow-[0_0_10px_rgba(16,185,129,0.7)]"
             />
             <text
               textAnchor="middle"
@@ -712,7 +716,7 @@ export default function TopologyCanvas({
 
         {/* Cisco Packet Tracer: Dropped Packet Badge at Link Outage */}
         {pduState && pduState.phase === 'dropped' && pduState.pos && (
-          <g transform={`translate(${pduState.pos.x}, ${pduState.pos.y - 36})`} className="pointer-events-none animate-bounce">
+          <g transform={`translate(${pduState.pos.x}, ${pduState.pos.y - 36})`} className="pointer-events-none">
             <rect
               x="-36"
               y="-10"
@@ -722,7 +726,7 @@ export default function TopologyCanvas({
               fill="#4c0519"
               stroke="#f43f5e"
               strokeWidth="1.5"
-              className="filter drop-shadow-[0_0_10px_rgba(244,63,94,0.9)]"
+              className="filter drop-shadow-[0_0_10px_rgba(244,63,94,0.7)]"
             />
             <text
               textAnchor="middle"
@@ -759,28 +763,39 @@ export default function TopologyCanvas({
               onMouseDown={(e) => handleMouseDown(node.id, e)}
               onTouchStart={(e) => handleTouchStart(node.id, e)}
             >
+              {/* Tick Synchronization Ripple: 1-shot expanding wave on each clock tick */}
+              {tick > 0 && !isDown && (
+                <circle
+                  key={`tick-ripple-${tick}-${node.id}`}
+                  r={radius + 3}
+                  fill="none"
+                  stroke="#1ed760"
+                  strokeWidth="2"
+                  className="animate-tick-ripple pointer-events-none"
+                />
+              )}
+
               {/* Outer Selection Ring */}
               {isSelected && (
                 <circle
-                  r={radius + 10}
+                  r={radius + 8}
                   fill="none"
-                  stroke="#38bdf8"
+                  stroke="#1ed760"
                   strokeWidth="2"
-                  strokeOpacity="0.7"
-                  className="animate-ping"
+                  strokeDasharray="4 3"
+                  opacity="0.85"
                 />
               )}
 
               {/* Traced Source/Dest Ring */}
               {isTracedNode && (
                 <circle
-                  r={radius + 7}
+                  r={radius + 6}
                   fill="none"
-                  stroke="#10b981"
+                  stroke="#1ed760"
                   strokeWidth="2"
                   strokeDasharray="4 2"
-                  className="animate-spin"
-                  style={{ transformOrigin: '0px 0px' }}
+                  opacity="0.9"
                 />
               )}
 
@@ -831,7 +846,7 @@ export default function TopologyCanvas({
                     ? '#064e3b'
                     : isSelected
                     ? '#0f2338'
-                    : '#14141c'
+                    : '#13141d'
                 }
                 stroke={
                   isDown
@@ -842,10 +857,20 @@ export default function TopologyCanvas({
                     ? '#10b981'
                     : isSelected
                     ? '#38bdf8'
-                    : '#27272a'
+                    : '#3f3f46'
                 }
-                strokeWidth={isSelected || isTracedNode ? '2.5' : '1.5'}
-                className="transition-colors hover:stroke-zinc-400"
+                strokeWidth={isSelected || isTracedNode ? '2.5' : '1.75'}
+                className="transition-colors hover:stroke-cyan-400"
+              />
+
+              {/* Inner Decorative Router Chassis Ring */}
+              <circle
+                r={radius - 4.5}
+                fill="none"
+                stroke={isDown ? '#27272a' : isTracedNode ? '#047857' : isSelected ? '#0284c7' : '#27272a'}
+                strokeWidth="1"
+                strokeDasharray="3 2"
+                className="pointer-events-none opacity-60"
               />
 
               {/* Router Monogram Letter */}
@@ -863,29 +888,30 @@ export default function TopologyCanvas({
               {/* Sub-label card with Router Name & IP */}
               <g transform={`translate(0, ${isCompact ? 33 : 37})`} className="pointer-events-none">
                 <rect
-                  x="-38"
-                  y="-6"
-                  width="76"
-                  height="19"
-                  rx="5"
+                  x="-40"
+                  y="-7"
+                  width="80"
+                  height="24"
+                  rx="6"
                   fill="#12131a"
-                  stroke={isTracedNode ? '#10b981' : '#27272a'}
+                  stroke={isTracedNode ? '#10b981' : isSelected ? '#38bdf8' : '#27272a'}
                   strokeWidth="1"
+                  className="filter drop-shadow-md"
                 />
                 <text
                   textAnchor="middle"
                   dy="4"
-                  fill="#e4e4e7"
-                  fontSize="9"
-                  fontWeight="600"
+                  fill="#f4f4f5"
+                  fontSize="9.5"
+                  fontWeight="700"
                 >
                   Router {node.id}
                 </text>
                 <text
                   textAnchor="middle"
-                  dy="12"
-                  fill="#71717a"
-                  fontSize="7.5"
+                  dy="13.5"
+                  fill="#94a3b8"
+                  fontSize="8"
                   fontFamily="monospace"
                 >
                   {ipAddr}
@@ -901,13 +927,13 @@ export default function TopologyCanvas({
         <div className="absolute bottom-11 left-1/2 -translate-x-1/2 z-20 px-3.5 py-1 rounded-full border backdrop-blur-md shadow-xl flex items-center gap-2 text-[11px] font-mono bg-zinc-950/95 border-zinc-800">
           {pduState.phase === 'forward' && (
             <div className="flex items-center gap-1.5 text-sky-300">
-              <Mail className="w-3.5 h-3.5 text-sky-400 animate-pulse" />
+              <Mail className="w-3.5 h-3.5 text-sky-400" />
               <span>Outbound: {pduState.statusText}</span>
             </div>
           )}
           {pduState.phase === 'reply' && (
             <div className="flex items-center gap-1.5 text-emerald-300">
-              <Mail className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+              <Mail className="w-3.5 h-3.5 text-[#1ed760]" />
               <span>Return: {pduState.statusText}</span>
             </div>
           )}

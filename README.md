@@ -52,28 +52,35 @@ Equipped with an interactive dark-mode React dashboard, Mininet Linux network na
 ## Key Features
 
 1. **Dual-Protocol Side-by-Side Comparison**
-   - Run the exact same custom topology under both Link State and Distance Vector algorithms.
+   - Run the exact same custom topology simultaneously under both Link State and Distance Vector algorithms.
+   - Synchronized side-by-side canvas views with independent metric badges and equalized telemetry cards.
    - Real-time comparison metrics: convergence time (ms & ticks), control packet message overhead, path optimality, and loop detection.
 
 2. **Deterministic State Machines**
    - **Link State (OSPF-style)**: Monotonic LSA sequence numbers, flooding across active neighbors, local Link State Database (LSDB) synchronization, and Dijkstra SPF calculation.
    - **Distance Vector (RIP-style)**: Distributed Bellman-Ford vector exchanges, with configurable **Split Horizon** and **Poison Reverse** toggles, and infinity metric customization (16, 32, 99).
 
-3. **Dynamic Topology Mutations & Count-to-Infinity Detection**
+3. **Cisco Packet Tracer Style Hop-by-Hop PDU Simulation**
+   - Select any source and destination router to inspect and compare forwarding decisions.
+   - Animated PDU envelope traversal along computed routes with live hop highlighting and round-trip verification.
+   - Data-plane fallback to native Linux kernel ICMP echo pings inside Mininet network namespaces.
+
+4. **Dynamic Topology Mutations & Count-to-Infinity Detection**
    - Add/remove routers and links dynamically.
    - Click any link to trigger sudden link failures (`DOWN`) or recoveries (`UP`).
    - Edit link weights/costs inline.
-   - Visual detection and step-by-step observation of Distance Vector **Count-to-Infinity** cost inflation when Split Horizon is disabled.
+   - Visual detection and step-by-step observation of Distance Vector **Count-to-Infinity** cost inflation with interactive 3-step educational lab.
 
-4. **Execution Modes**
-   - **Continuous Real-Time Mode**: Configurable tick speed slider (100ms - 1500ms).
-   - **Tick-by-Tick Step Mode**: Inspect individual LSA floods and Distance Vector exchanges tick by tick.
+5. **Academic Lab Report Generator**
+   - Export formal markdown lab reports formatted for academic grading and submission.
+   - Includes executive summary, convergence comparison metrics, link matrix, and complete per-router forwarding tables.
 
-5. **Telemetry Inspector & Mininet Data-Plane Ping**
-   - Click any router on the canvas to inspect its live routing table, next-hop forwarding pointers, sequence numbers, and active shortest-path tree highlights.
-   - Run live end-to-end ICMP ping tests between router network namespaces.
+6. **Spotify OLED Dark UI & Responsive Architecture**
+   - Industrial OLED dark theme (`#000000`, card `#121212`, accent `#1ed760`) with JetBrains Mono typography.
+   - Fully responsive layout audited across mobile (<640px), tablet (640-1024px), and desktop/dual-pane screens.
+   - Sleek convergence lock-in HUD notification pill and discrete single-shot tick synchronization ripples.
 
-6. **Mininet Kernel Namespace Integration with Failsafe Cleanup**
+7. **Mininet Kernel Namespace Integration with Failsafe Cleanup**
    - Automatic detection of Linux Mininet runtime; configures router hosts and IP forwarding (`sysctl -w net.ipv4.ip_forward=1`).
    - Falls back seamlessly to virtual software namespaces on non-root or non-Linux systems.
    - Guaranteed automatic cleanup via `atexit` and signal handlers executing `mn -c` to scrub orphaned Open vSwitch / veth devices.
@@ -86,40 +93,43 @@ Equipped with an interactive dark-mode React dashboard, Mininet Linux network na
 ├── backend/
 │   ├── engine/
 │   │   ├── __init__.py
-│   │   ├── topology.py         # Network graph model, dynamic mutations & presets
-│   │   ├── mininet_bridge.py   # Mininet OVS manager, fallback namespaces & mn -c cleanup
-│   │   ├── link_state.py       # Dijkstra SPF, LSA sequence flooding & LSDB
-│   │   ├── distance_vector.py  # Bellman-Ford, Split Horizon, Poison Reverse & loop checks
-│   │   └── simulator.py        # Central coordinator & dual-protocol benchmarking
-│   ├── server.py               # FastAPI server, WebSockets & static frontend mount
-│   ├── verify_sim.py           # Verification test suite for routing engines
-│   ├── test_server_api.py      # REST endpoint integration tests
-│   ├── test_websocket.py       # WebSocket bi-directional streaming tests
-│   └── requirements.txt        # Backend dependencies
+│   │   ├── topology.py             # Network graph model, dynamic mutations & presets
+│   │   ├── mininet_bridge.py       # Mininet OVS manager, fallback namespaces & mn -c cleanup
+│   │   ├── link_state.py           # Dijkstra SPF, LSA sequence flooding & LSDB
+│   │   ├── distance_vector.py      # Bellman-Ford, Split Horizon, Poison Reverse & loop checks
+│   │   └── simulator.py            # Central coordinator & dual-protocol benchmarking
+│   ├── server.py                   # FastAPI server, WebSockets & static frontend mount
+│   ├── verify_sim.py               # Verification test suite for routing engines
+│   ├── test_server_api.py          # REST endpoint integration tests
+│   ├── test_websocket.py           # WebSocket bi-directional streaming tests
+│   └── requirements.txt            # Backend dependencies
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── TopologyCanvas.jsx     # SVG network visualizer with in-flight packets
-│   │   │   ├── ControlPanel.jsx       # Protocol toggles, presets, play/step controls
-│   │   │   ├── RoutingTableModal.jsx  # Telemetry inspector & Mininet ping
-│   │   │   ├── ComparisonPanel.jsx    # Dual protocol benchmark scorecard
-│   │   │   ├── EventLogPanel.jsx      # Real-time control plane log stream
-│   │   │   └── AddNodeModal.jsx       # Add new router dialog
-│   │   ├── App.jsx                    # Root application component
-│   │   └── index.css                  # Tailwind styles & dark mode glassmorphism
+│   │   │   ├── TopologyCanvas.jsx         # SVG network visualizer with in-flight packets & tick ripple
+│   │   │   ├── ControlPanel.jsx           # Protocol toggles, presets, speed slider & play/step controls
+│   │   │   ├── PacketTracerBar.jsx        # Cisco Packet Tracer hop-by-hop PDU envelope simulation
+│   │   │   ├── RoutingTableModal.jsx      # Telemetry inspector, LSDB/vectors & Mininet ping
+│   │   │   ├── ComparisonPanel.jsx        # Dual-protocol benchmark comparison scorecard
+│   │   │   ├── CountToInfinityModal.jsx   # Interactive 3-step Count-to-Infinity & Poison Reverse lab
+│   │   │   ├── LabReportModal.jsx         # Formal markdown academic lab report generator
+│   │   │   ├── EventLogPanel.jsx          # Real-time control plane telemetry log stream
+│   │   │   └── AddNodeModal.jsx           # Add custom router dialog
+│   │   ├── App.jsx                        # Root application component & layout state
+│   │   └── index.css                      # Spotify OLED Dark master theme & animations
 │   ├── package.json
 │   └── vite.config.js
 ├── docker/
-│   ├── Dockerfile              # Privileged multi-stage Ubuntu 22.04 with Mininet & OVS
-│   └── entrypoint.sh           # OVS daemon startup, mn -c pre-flight & server launch
+│   ├── Dockerfile                  # Privileged multi-stage Ubuntu 22.04 with Mininet & OVS
+│   └── entrypoint.sh               # OVS daemon startup, mn -c pre-flight & server launch
 ├── k8s/
-│   ├── deployment.yaml         # Kubernetes privileged pod with NET_ADMIN/SYS_ADMIN
-│   ├── service.yaml            # NodePort service exposing port 8000
+│   ├── deployment.yaml             # Kubernetes privileged pod with NET_ADMIN/SYS_ADMIN
+│   ├── service.yaml                # NodePort service exposing port 8000
 │   └── kustomization.yaml
-├── docker-compose.yml          # Privileged container specification
-├── run_server.py               # Root Python launcher
-├── start.bat                   # 1-click Windows launcher
-├── start.sh                    # Linux/macOS launcher
+├── docker-compose.yml              # Privileged container specification
+├── run_server.py                   # Root Python launcher
+├── start.bat                       # 1-click Windows launcher
+├── start.sh                        # Linux/macOS launcher
 └── README.md
 ```
 

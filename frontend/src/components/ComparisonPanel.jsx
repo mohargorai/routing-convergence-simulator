@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Trophy, CheckCircle2, AlertTriangle, Cpu, Send, Layers, BarChart } from 'lucide-react';
+import { X, Trophy } from 'lucide-react';
 
 export default function ComparisonPanel({ benchmarkData, onClose, onRerun }) {
   if (!benchmarkData) return null;
@@ -11,17 +11,17 @@ export default function ComparisonPanel({ benchmarkData, onClose, onRerun }) {
   const isDvFaster = dv.ticks < ls.ticks;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-3xl bg-[#0f172a] border border-cyan-500/40 rounded-3xl shadow-[0_0_60px_rgba(6,182,212,0.2)] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-md animate-fade-in">
+      <div className="relative w-full max-w-3xl bg-[#0f172a] border border-cyan-500/40 rounded-3xl shadow-[0_0_60px_rgba(6,182,212,0.2)] max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/60">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-800 bg-slate-900/60">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-gradient-to-br from-cyan-500 to-indigo-600 rounded-2xl text-white shadow-lg">
-              <Trophy className="w-6 h-6" />
+            <div className="p-2 sm:p-2.5 bg-gradient-to-br from-cyan-500 to-indigo-600 rounded-2xl text-white shadow-lg">
+              <Trophy className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">Dual-Protocol Convergence Benchmark</h2>
-              <p className="text-xs text-slate-400">
+              <h2 className="text-base sm:text-xl font-bold text-white">Dual-Protocol Convergence Benchmark</h2>
+              <p className="text-[11px] sm:text-xs text-slate-400">
                 Topology: <strong className="text-cyan-300 font-mono">{benchmarkData.topology_name}</strong> •{' '}
                 {benchmarkData.node_count} Nodes • {benchmarkData.link_count} Links
               </p>
@@ -29,14 +29,14 @@ export default function ComparisonPanel({ benchmarkData, onClose, onRerun }) {
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors"
+            className="p-1.5 sm:p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Verdict Banner */}
-        <div className="px-6 py-3 bg-gradient-to-r from-cyan-950/40 to-slate-900 border-b border-slate-800 text-xs flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-cyan-950/40 to-slate-900 border-b border-slate-800 text-xs flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="text-cyan-400 font-bold uppercase tracking-wider">Analysis:</span>
             <span className="text-slate-200 font-medium">{benchmarkData.verdict}</span>
@@ -50,7 +50,7 @@ export default function ComparisonPanel({ benchmarkData, onClose, onRerun }) {
         </div>
 
         {/* Comparison Cards Side-by-Side */}
-        <div className="p-6 grid grid-cols-2 gap-4">
+        <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Link State Card */}
           <div
             className={`p-5 rounded-2xl border transition-all ${

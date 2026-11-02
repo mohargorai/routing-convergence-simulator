@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Download, Copy, Check, X, Printer, ExternalLink } from 'lucide-react';
+import { FileText, Download, Copy, Check, X } from 'lucide-react';
 
 export default function LabReportModal({
   onClose,
@@ -7,7 +7,6 @@ export default function LabReportModal({
   lsTelemetry,
   dvTelemetry,
   mininetStatus,
-  protocol,
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -104,8 +103,8 @@ export default function LabReportModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-4xl bg-[#0f172a] border border-emerald-500/40 rounded-3xl p-6 shadow-2xl flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+      <div className="relative w-full max-w-4xl bg-[#0f172a] border border-emerald-500/40 rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
           <div className="flex items-center gap-2.5">
@@ -133,7 +132,7 @@ export default function LabReportModal({
         </div>
 
         {/* Action Buttons Toolbar */}
-        <div className="flex items-center justify-between bg-slate-900/90 border border-slate-800 px-4 py-2 rounded-xl mb-4 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-900/90 border border-slate-800 px-3 sm:px-4 py-2 rounded-xl mb-4 text-xs">
           <div className="text-slate-400 font-mono text-[11px]">
             Target: <strong className="text-slate-200">{topoName}</strong> • Routers: <strong className="text-cyan-400">{nodeCount}</strong> • Links: <strong className="text-cyan-400">{linkCount}</strong>
           </div>
