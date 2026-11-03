@@ -35,16 +35,67 @@ def node_to_ip(node_id: str) -> str:
     return f"10.0.0.{max(1, min(254, idx))}"
 
 
+def _probe_mininet_privileges() -> bool:
+    """
+    Verify whether the current Linux environment actually possesses the required
+    CAP_NET_ADMIN privileges and Open vSwitch daemon to run Mininet without hanging.
+    In unprivileged cloud containers (Render, Railway, Heroku), processes run as uid 0
+    but lack kernel network namespace permissions, causing Mininet to block indefinitely.
+    """
+    enable_env = os.getenv("ENABLE_MININET", "auto").strip().lower()
+    if enable_env in ["false", "0", "no", "off", "disable", "disabled"]:
+        logger.info("Mininet native explicitly disabled via ENABLE_MININET environment variable.")
+        return False
+
+    if platform.system().lower() != "linux" or os.geteuid() != 0:
+        return False
+
+    # 1. Probe if unshare(CLONE_NEWNET) is permitted (requires CAP_NET_ADMIN)
+    try:
+        res = subprocess.run(
+            ["unshare", "-n", "true"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=1.0,
+        )
+        if res.returncode != 0:
+            logger.info("Linux kernel network namespace creation (unshare -n) not permitted. Using emulation mode.")
+            return False
+    except Exception as ex:
+        logger.info(f"Namespace probe failed ({ex}). Using emulation mode.")
+        return False
+
+    # 2. Probe if Open vSwitch is running and responsive
+    try:
+        res = subprocess.run(
+            ["ovs-vsctl", "show"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=1.0,
+        )
+        if res.returncode != 0:
+            logger.info("Open vSwitch daemon not active or responsive. Using emulation mode.")
+            return False
+    except Exception as ex:
+        logger.info(f"OVS probe failed ({ex}). Using emulation mode.")
+        return False
+
+    return True
+
+
 HAS_MININET = False
 try:
-    if platform.system().lower() == "linux" and os.geteuid() == 0:  # type: ignore
+    if _probe_mininet_privileges():
         import mininet  # type: ignore
         from mininet.net import Mininet  # type: ignore
         from mininet.node import Host, OVSSwitch, Controller  # type: ignore
         from mininet.link import TCLink  # type: ignore
         from mininet.cli import CLI  # type: ignore
         HAS_MININET = True
-        logger.info("Mininet native Python API detected and root privileges verified.")
+        logger.info("Mininet native Python API detected and verified with active network capabilities.")
+    else:
+        HAS_MININET = False
+        logger.info("Operating in High-Fidelity Network Emulation mode (cloud and desktop safe).")
 except Exception as e:
     HAS_MININET = False
     logger.info(f"Mininet native unavailable ({e}). Operating in High-Fidelity Network Emulation mode.")

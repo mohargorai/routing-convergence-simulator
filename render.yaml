@@ -8,3 +8,5 @@ services:
     envVars:
       - key: PORT
         value: 8000
+      - key: ENABLE_MININET
+        value: "false"

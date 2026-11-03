@@ -50,3 +50,4 @@ EXPOSE 8000
 
 # Start server with dynamic $PORT support for cloud deployments
 ENTRYPOINT ["/entrypoint.sh"]
+
