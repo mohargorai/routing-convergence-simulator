@@ -215,6 +215,22 @@ kubectl port-forward svc/routing-simulator-service 8000:8000
 
 ---
 
+### Option 4: Deploy Live to Cloud (Render / Railway / PaaS)
+
+The repository is pre-configured for 1-click cloud deployment with dynamic `$PORT` routing and real-time WebSocket telemetry (`wss://`).
+
+#### Deploy on Render (Free Web Service)
+1. Go to [render.com](https://render.com) and log in with GitHub.
+2. Click **New +** → **Web Service** → Connect your repository `mohargorai/routing-convergence-simulator`.
+3. Render automatically detects the root `Dockerfile` and `render.yaml`.
+4. Click **Create Web Service**. Render builds the container, allocates a free HTTPS/WSS domain (`https://<app-name>.onrender.com`), and automatically redeploys whenever you push to `main`.
+
+#### Deploy on Railway
+1. Go to [railway.app](https://railway.app) and click **New Project** → **Deploy from GitHub repo**.
+2. Select `routing-convergence-simulator`. Railway builds the multi-stage Dockerfile and provisions a live public URL (`https://<app-name>.up.railway.app`).
+
+---
+
 ## Demonstrating Count-to-Infinity & Poison Reverse
 
 To reproduce the classic Distance Vector Count-to-Infinity pathology:

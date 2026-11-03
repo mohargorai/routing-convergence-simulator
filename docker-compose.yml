@@ -2,7 +2,7 @@ services:
   routing-simulator:
     build:
       context: .
-      dockerfile: docker/Dockerfile
+      dockerfile: Dockerfile
     container_name: routing_convergence_sim
     privileged: true
     cap_add:

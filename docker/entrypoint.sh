@@ -8,5 +8,5 @@ echo "[INIT] Running Mininet pre-flight cleanup (mn -c)..."
 mn -c > /dev/null 2>&1 || true
 
 echo "[INIT] Starting Routing Convergence Simulator Backend & UI..."
-exec uvicorn backend.server:app --host 0.0.0.0 --port 8000 --log-level info
+exec uvicorn backend.server:app --host 0.0.0.0 --port "${PORT:-8000}" --log-level info
 
